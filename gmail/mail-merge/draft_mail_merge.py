@@ -32,8 +32,8 @@ from httplib2 import Http
 from oauth2client import file, client, tools
 
 # Fill-in IDs of your Docs template & any Sheets data source
-DOCS_FILE_ID = '1LQ3omSt0IMrgXSEqNMpSBcO_vgvXDpt2Jo8AalVsapc'
 SHEETS_FILE_ID = '1zAmLQWZclO-picIy6kQdw1XMIGEOUXcNKCPqyX0R2cY'
+DRAFT_SUBJECT = '最后通知：您的Google Workspace工作账号即将迁移到新的Google Workspace平台'
 
 # authorization constants
 CLIENT_ID_FILE = '/Users/fangchih/Dropbox/devkey/client_secret_480714232090-i4uvmjv4nmevt0ac24rninmod5ijgc6i.apps.googleusercontent.com.json'
@@ -42,18 +42,14 @@ SCOPES = (  # iterable or space-delimited string
     'https://www.googleapis.com/auth/drive',
     'https://www.googleapis.com/auth/documents',
     'https://www.googleapis.com/auth/spreadsheets.readonly',
+    'https://www.googleapis.com/auth/gmail.readonly',
+    'https://www.googleapis.com/auth/gmail.send'
 )
 
 # application constants
-SOURCES = ('text', 'sheets')
 SOURCE = 'sheets' # Choose one of the data SOURCES
 COLUMNS = ['to_name', 'to_title', 'to_company', 'to_address']
-TEXT_SOURCE_DATA = (
-    ('Ms. Lara Brown', 'Googler', 'Google NYC', '111 8th Ave\n'
-                                                'New York, NY  10011-5201'),
-    ('Mr. Jeff Erson', 'Googler', 'Google NYC', '76 9th Ave\n'
-                                                'New York, NY  10011-4962'),
-)
+
 
 def get_http_client():
     """Uses project credentials in CLIENT_ID_FILE along with requested OAuth2
@@ -66,24 +62,14 @@ def get_http_client():
         creds = tools.run_flow(flow, store)
     return creds.authorize(Http())
 
+
 # service endpoints to Google APIs
 HTTP = get_http_client()
 DRIVE = discovery.build('drive', 'v3', http=HTTP)
 DOCS = discovery.build('docs', 'v1', http=HTTP)
 SHEETS = discovery.build('sheets', 'v4', http=HTTP)
+GMAIL = discovery.build('gmail', 'v1', http=HTTP)
 
-def get_data(source):
-    """Gets mail merge data from chosen data source.
-    """
-    if source not in {'sheets', 'text'}:
-        raise ValueError('ERROR: unsupported source %r; choose from %r' % (
-            source, SOURCES))
-    return SAFE_DISPATCH[source]()
-
-def _get_text_data():
-    """(private) Returns plain text data; can alter to read from CSV file.
-    """
-    return TEXT_SOURCE_DATA
 
 def _get_sheets_data(service=SHEETS):
     """(private) Returns data from Google Sheets source. It gets all rows of
@@ -95,39 +81,6 @@ def _get_sheets_data(service=SHEETS):
     global COLUMNS
     COLUMNS = ssvalues[0]
     return ssvalues[1:] # skip header row
-
-# data source dispatch table [better alternative vs. eval()]
-SAFE_DISPATCH = {k: globals().get('_get_%s_data' % k) for k in SOURCES}
-
-def _copy_template(tmpl_id, source, service):
-    """(private) Copies letter template document using Drive API then
-        returns file ID of (new) copy.
-    """
-    body = {'name': 'Merged form letter (%s)' % source}
-    return service.files().copy(body=body, fileId=tmpl_id,
-            fields='id').execute().get('id')
-
-def merge_template(tmpl_id, source, service):
-    """Copies template document and merges data into newly-minted copy then
-        returns its file ID.
-    """
-    # copy template and set context data struct for merging template values
-    copy_id = _copy_template(tmpl_id, source, service)
-    context = merge.iteritems() if hasattr({}, 'iteritems') else merge.items()
-
-    # "search & replace" API requests for mail merge substitutions
-    reqs = [{'replaceAllText': {
-                'containsText': {
-                    'text': '{{%s}}' % key,
-                    'matchCase': True,
-                },
-                'replaceText': value,
-            }} for key, value in context]
-
-    # send requests to Docs API to do actual merge
-    DOCS.documents().batchUpdate(body={'requests': reqs},
-            documentId=copy_id, fields='').execute()
-    return copy_id
 
 
 def gen_token():
@@ -142,13 +95,65 @@ def gen_token():
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                CLIENT_ID_FILE, SCOPES)
+            flow = InstalledAppFlow.from_client_secrets_file(CLIENT_ID_FILE, SCOPES)
             creds = flow.run_local_server(port=0)
         # Save the credentials for the next run
         # with open(TOKEN_STORE_FILE, 'w') as token:
         #     token.write(creds.to_json())
 
+
+    def getGmailTemplateFromDrafts_(subject_line):
+        """
+        Get a Gmail draft message by matching the subject line.
+        @param {string} subject_line to search for draft message
+        @return {object} containing the subject, plain and html message body and attachments
+        """
+        try:
+            // get drafts
+            const drafts = GmailApp.getDrafts();
+            // filter the drafts that match subject line
+            const draft = drafts.filter(subjectFilter_(subject_line))[0];
+            // get the message object
+            const msg = draft.getMessage();
+
+            // Handling inline images and attachments so they can be included in the merge
+            // Based on https://stackoverflow.com/a/65813881/1027723
+            // Get all attachments and inline image attachments
+            const allInlineImages = draft.getMessage().getAttachments({includeInlineImages: true,includeAttachments:false});
+            const attachments = draft.getMessage().getAttachments({includeInlineImages: false});
+            const htmlBody = msg.getBody(); 
+
+            // Create an inline image object with the image name as key 
+            // (can't rely on image index as array based on insert order)
+            const img_obj = allInlineImages.reduce((obj, i) => (obj[i.getName()] = i, obj) ,{});
+
+            //Regexp to search for all img string positions with cid
+            const imgexp = RegExp('<img.*?src="cid:(.*?)".*?alt="(.*?)"[^\>]+>', 'g');
+            const matches = [...htmlBody.matchAll(imgexp)];
+
+            //Initiate the allInlineImages object
+            const inlineImagesObj = {};
+            // built an inlineImagesObj from inline image matches
+            matches.forEach(match => inlineImagesObj[match[1]] = img_obj[match[2]]);
+
+            return {message: {subject: subject_line, text: msg.getPlainBody(), html:htmlBody}, 
+                    attachments: attachments, inlineImages: inlineImagesObj };
+        except Exception as e:
+            throw new Error("Oops - can't find Gmail draft");
+
+        /**
+            * Filter draft objects with the matching subject linemessage by matching the subject line.
+            * @param {string} subject_line to search for draft message
+            * @return {object} GmailDraft object
+        */
+        function subjectFilter_(subject_line){
+            return function(element) {
+            if (element.getMessage().getSubject() === subject_line) {
+                return element;
+            }
+            }
+        }
+  
 
 
 if __name__ == '__main__':
