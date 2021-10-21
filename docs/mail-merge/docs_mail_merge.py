@@ -32,11 +32,11 @@ from httplib2 import Http
 from oauth2client import file, client, tools
 
 # Fill-in IDs of your Docs template & any Sheets data source
-DOCS_FILE_ID = '1LQ3omSt0IMrgXSEqNMpSBcO_vgvXDpt2Jo8AalVsapc'
-SHEETS_FILE_ID = '1zAmLQWZclO-picIy6kQdw1XMIGEOUXcNKCPqyX0R2cY'
+DOCS_FILE_ID = ''
+SHEETS_FILE_ID = ''
 
 # authorization constants
-CLIENT_ID_FILE = '/Users/fangchih/Dropbox/devkey/client_secret_480714232090-i4uvmjv4nmevt0ac24rninmod5ijgc6i.apps.googleusercontent.com.json'
+CLIENT_ID_FILE = ''
 TOKEN_STORE_FILE = 'token.json'
 SCOPES = (  # iterable or space-delimited string
     'https://www.googleapis.com/auth/drive',
