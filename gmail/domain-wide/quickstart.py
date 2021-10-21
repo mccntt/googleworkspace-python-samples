@@ -18,7 +18,7 @@ def main():
 
 
     DELEGATE='aaron.ko@dev.hkmci.com'  # Service account will impersonate this user. Must have proper admin privileges in G Suite.
-    TARGET='dev.hkmci.com'  # Service account wants to access data from this.
+    # TARGET='dev.hkmci.com'  # Service account wants to access data from this.
 
     credentials = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
     credentials_delegated = credentials.with_subject(DELEGATE)
