@@ -7,3 +7,5 @@
 1. Install required libraries.
   - pip install -r requirements.txt
 1. update global variables in code.
+  - key file
+  - sheet id
