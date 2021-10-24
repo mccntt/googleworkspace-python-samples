@@ -4,7 +4,7 @@
 
 
 from __future__ import print_function
-import os.path
+from pathlib import Path
 from googleapiclient.discovery import build
 from google.oauth2 import service_account
 
@@ -13,7 +13,8 @@ SCOPES = [
     'https://www.googleapis.com/auth/gmail.readonly',
     'https://www.googleapis.com/auth/spreadsheets'
     ]
-SERVICE_ACCOUNT_FILE = '/Users/fangchih/Dropbox/devkey/devhkmci-gmaildomainwide-1d7640a0c6d2.json'
+HOME_PATH = str(Path.home())
+SERVICE_ACCOUNT_FILE = HOME_PATH + '/devkey/devhkmci-gmaildomainwide-1d7640a0c6d2.json'
 SHEETS_FILE_ID = '1CIpaJuibLaA6YYpMq9l34yHqEv4KoiUlvszU6PnXRXs'
 # test file: https://docs.google.com/spreadsheets/d/1CIpaJuibLaA6YYpMq9l34yHqEv4KoiUlvszU6PnXRXs/edit#gid=0
 

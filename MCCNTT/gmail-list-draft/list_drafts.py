@@ -16,7 +16,7 @@
 from __future__ import print_function
 
 import os.path
-import json
+from pathlib import Path
 
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -25,8 +25,8 @@ from google.oauth2.credentials import Credentials
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
-
-CLIENT_ID_FILE = '/Users/fangchih/Dropbox/devkey/client_secret_480714232090-i4uvmjv4nmevt0ac24rninmod5ijgc6i.apps.googleusercontent.com.json'
+HOME_PATH = str(Path.home())
+CLIENT_ID_FILE = HOME_PATH + '/devkey/client_secret_480714232090-i4uvmjv4nmevt0ac24rninmod5ijgc6i.apps.googleusercontent.com.json'
 
 def main():
     """Shows basic usage of the Gmail API.

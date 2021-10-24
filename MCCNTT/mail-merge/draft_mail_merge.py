@@ -22,6 +22,7 @@ from __future__ import print_function
 import time
 
 import os.path
+from pathlib import Path
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
@@ -36,7 +37,8 @@ SHEETS_FILE_ID = '1zAmLQWZclO-picIy6kQdw1XMIGEOUXcNKCPqyX0R2cY'
 DRAFT_SUBJECT = '最后通知：您的Google Workspace工作账号即将迁移到新的Google Workspace平台'
 
 # authorization constants
-CLIENT_ID_FILE = '/Users/fangchih/Dropbox/devkey/client_secret_480714232090-i4uvmjv4nmevt0ac24rninmod5ijgc6i.apps.googleusercontent.com.json'
+HOME_PATH = str(Path.home())
+CLIENT_ID_FILE = HOME_PATH + '/devkey/client_secret_480714232090-i4uvmjv4nmevt0ac24rninmod5ijgc6i.apps.googleusercontent.com.json'
 TOKEN_STORE_FILE = 'token.json'
 SCOPES = (  # iterable or space-delimited string
     'https://www.googleapis.com/auth/drive',
