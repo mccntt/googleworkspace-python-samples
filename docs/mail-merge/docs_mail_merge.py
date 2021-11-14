@@ -14,29 +14,22 @@
 
 """
 docs-mail-merge.py (Python 2.x or 3.x)
-
 Google Docs (REST) API mail-merge sample app
 """
 # [START mail_merge_python]
 from __future__ import print_function
 import time
 
-import os.path
-from googleapiclient.discovery import build
-from google_auth_oauthlib.flow import InstalledAppFlow
-from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
-
 from googleapiclient import discovery
 from httplib2 import Http
 from oauth2client import file, client, tools
 
 # Fill-in IDs of your Docs template & any Sheets data source
-DOCS_FILE_ID = ''
-SHEETS_FILE_ID = ''
+DOCS_FILE_ID = 'YOUR_TMPL_DOC_FILE_ID'
+SHEETS_FILE_ID = 'YOUR_SHEET_DATA_FILE_ID'
 
 # authorization constants
-CLIENT_ID_FILE = ''
+CLIENT_ID_FILE = 'credentials.json'
 TOKEN_STORE_FILE = 'token.json'
 SCOPES = (  # iterable or space-delimited string
     'https://www.googleapis.com/auth/drive',
@@ -46,7 +39,7 @@ SCOPES = (  # iterable or space-delimited string
 
 # application constants
 SOURCES = ('text', 'sheets')
-SOURCE = 'sheets' # Choose one of the data SOURCES
+SOURCE = 'text' # Choose one of the data SOURCES
 COLUMNS = ['to_name', 'to_title', 'to_company', 'to_address']
 TEXT_SOURCE_DATA = (
     ('Ms. Lara Brown', 'Googler', 'Google NYC', '111 8th Ave\n'
@@ -90,11 +83,8 @@ def _get_sheets_data(service=SHEETS):
         'Sheet1' (the default Sheet in a new spreadsheet), but drops the first
         (header) row. Use any desired data range (in standard A1 notation).
     """
-    ssvalues = service.spreadsheets().values().get(spreadsheetId=SHEETS_FILE_ID,
-            range='Sheet1').execute().get('values')
-    global COLUMNS
-    COLUMNS = ssvalues[0]
-    return ssvalues[1:] # skip header row
+    return service.spreadsheets().values().get(spreadsheetId=SHEETS_FILE_ID,
+            range='Sheet1').execute().get('values')[1:] # skip header row
 
 # data source dispatch table [better alternative vs. eval()]
 SAFE_DISPATCH = {k: globals().get('_get_%s_data' % k) for k in SOURCES}
@@ -118,7 +108,7 @@ def merge_template(tmpl_id, source, service):
     # "search & replace" API requests for mail merge substitutions
     reqs = [{'replaceAllText': {
                 'containsText': {
-                    'text': '{{%s}}' % key,
+                    'text': '{{%s}}' % key.upper(), # {{VARS}} are uppercase
                     'matchCase': True,
                 },
                 'replaceText': value,
@@ -130,39 +120,33 @@ def merge_template(tmpl_id, source, service):
     return copy_id
 
 
-def gen_token():
-    creds = None
-    # The file token.json stores the user's access and refresh tokens, and is
-    # created automatically when the authorization flow completes for the first
-    # time.
-    if os.path.exists(TOKEN_STORE_FILE):
-        creds = Credentials.from_authorized_user_file(TOKEN_STORE_FILE, SCOPES)
-    # If there are no (valid) credentials available, let the user log in.
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                CLIENT_ID_FILE, SCOPES)
-            creds = flow.run_local_server(port=0)
-        # Save the credentials for the next run
-        # with open(TOKEN_STORE_FILE, 'w') as token:
-        #     token.write(creds.to_json())
-
-
-
 if __name__ == '__main__':
-
-    gen_token()
-
     # fill-in your data to merge into document template variables
-    merge = {}
+    merge = {
+        # sender data
+        'my_name': 'Ayme A. Coder',
+        'my_address': '1600 Amphitheatre Pkwy\n'
+                      'Mountain View, CA  94043-1351',
+        'my_email': 'http://google.com',
+        'my_phone': '+1-650-253-0000',
+        # - - - - - - - - - - - - - - - - - - - - - - - - - -
+        # recipient data (supplied by 'text' or 'sheets' data source)
+        'to_name': None,
+        'to_title': None,
+        'to_company': None,
+        'to_address': None,
+        # - - - - - - - - - - - - - - - - - - - - - - - - - -
+        'date': time.strftime('%Y %B %d'),
+        # - - - - - - - - - - - - - - - - - - - - - - - - - -
+        'body': 'Google, headquartered in Mountain View, unveiled the new '
+                'Android phone at the Consumer Electronics Show. CEO Sundar '
+                'Pichai said in his keynote that users love their new phones.'
+    }
 
     # get row data, then loop through & process each form letter
     data = get_data(SOURCE) # get data from data source
     for i, row in enumerate(data):
         merge.update(dict(zip(COLUMNS, row)))
-        print(merge)
         print('Merged letter %d: docs.google.com/document/d/%s/edit' % (
                 i+1, merge_template(DOCS_FILE_ID, SOURCE, DRIVE)))
 # [END mail_merge_python]
