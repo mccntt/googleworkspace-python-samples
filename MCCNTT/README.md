@@ -1,1 +1,0 @@
-## Technical Team @ Master Concept China 
