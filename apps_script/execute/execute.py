@@ -14,10 +14,13 @@
 
 # [START apps_script_api_execute]
 from __future__ import print_function
+
 from googleapiclient import errors
 from googleapiclient.discovery import build
-from httplib2 import Http
-from oauth2client import file as oauth_file, client, tools
+from oauth2client import client
+from oauth2client import file as oauth_file
+from oauth2client import tools
+
 
 def main():
     """Runs the sample.
@@ -42,7 +45,7 @@ def main():
     try:
         # Make the API request.
         response = service.scripts().run(body=request,
-                scriptId=SCRIPT_ID).execute()
+                                         scriptId=SCRIPT_ID).execute()
 
         if 'error' in response:
             # The API executed, but the script returned an error.
@@ -59,7 +62,7 @@ def main():
                 print("Script error stacktrace:")
                 for trace in error['scriptStackTraceElements']:
                     print("\t{0}: {1}".format(trace['function'],
-                        trace['lineNumber']))
+                                              trace['lineNumber']))
         else:
             # The structure of the result depends upon what the Apps Script
             # function returns. Here, the function returns an Apps Script Object

@@ -1,11 +1,11 @@
 # Copyright 2021 Google LLC
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     https://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,14 +14,14 @@
 
 # [START forms_update_form]
 from __future__ import print_function
+
 from apiclient import discovery
 from httplib2 import Http
-from oauth2client import client
-from oauth2client import file
-from oauth2client import tools
+from oauth2client import client, file, tools
 
 SCOPES = "https://www.googleapis.com/auth/forms.body"
-DISCOVERY_DOC = "https://forms.googleapis.com/$discovery/rest?version=v1beta&key=<YOUR_API_KEY>&labels=FORMS_BETA_TESTERS"
+API_KEY = "<YOUR_API_KEY>"
+DISCOVERY_DOC = f"https://forms.googleapis.com/$discovery/rest?version=v1beta&key={API_KEY}&labels=FORMS_BETA_TESTERS"
 
 store = file.Storage('credentials.json')
 creds = None
@@ -30,7 +30,7 @@ if not creds or creds.invalid:
     creds = tools.run_flow(flow, store)
 
 form_service = discovery.build('forms', 'v1beta', http=creds.authorize(
-    Http()), discoveryServiceUrl=DISCOVERY_DOC,static_discovery=False)
+    Http()), discoveryServiceUrl=DISCOVERY_DOC, static_discovery=False)
 
 form = {
     "info": {
@@ -54,7 +54,8 @@ update = {
 }
 
 # Update the form with a description
-question_setting = form_service.forms().batchUpdate(formId=createResult["formId"], body=update).execute()
+question_setting = form_service.forms().batchUpdate(
+    formId=createResult["formId"], body=update).execute()
 
 # Print the result to see it now has a description
 getresult = form_service.forms().get(formId=createResult["formId"]).execute()

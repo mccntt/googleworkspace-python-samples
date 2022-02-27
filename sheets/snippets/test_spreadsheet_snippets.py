@@ -13,8 +13,10 @@
 # limitations under the License.
 
 import unittest
-from spreadsheet_snippets import SpreadsheetSnippets
+
 from base_test import BaseTest
+from spreadsheet_snippets import SpreadsheetSnippets
+
 
 class SpreadsheetSnippetsTest(BaseTest):
     @classmethod
@@ -31,7 +33,7 @@ class SpreadsheetSnippetsTest(BaseTest):
         spreadsheet_id = self.create_test_spreadsheet()
         self.populate_values(spreadsheet_id)
         response = self.snippets.batch_update(spreadsheet_id,
-                'New Title', 'Hello', 'Goodbye')
+                                              'New Title', 'Hello', 'Goodbye')
         self.assertIsNotNone(response)
         replies = response.get('replies')
         self.assertIsNotNone(replies)
@@ -54,7 +56,7 @@ class SpreadsheetSnippetsTest(BaseTest):
         spreadsheet_id = self.create_test_spreadsheet()
         self.populate_values(spreadsheet_id)
         result = self.snippets.batch_get_values(spreadsheet_id,
-            ['A1:A3', 'B1:C1'])
+                                                ['A1:A3', 'B1:C1'])
         self.assertIsNotNone(result)
         valueRanges = result.get('valueRanges')
         self.assertIsNotNone(valueRanges)
@@ -65,10 +67,10 @@ class SpreadsheetSnippetsTest(BaseTest):
     def test_update_values(self):
         spreadsheet_id = self.create_test_spreadsheet()
         result = self.snippets.update_values(spreadsheet_id,
-            'A1:B2', 'USER_ENTERED', [
-                ['A', 'B'],
-                ['C', 'D']
-            ])
+                                             'A1:B2', 'USER_ENTERED', [
+                                                 ['A', 'B'],
+                                                 ['C', 'D']
+                                             ])
         self.assertIsNotNone(result)
         self.assertEqual(2, result.get('updatedRows'))
         self.assertEqual(2, result.get('updatedColumns'))
@@ -77,10 +79,10 @@ class SpreadsheetSnippetsTest(BaseTest):
     def test_batch_update_values(self):
         spreadsheet_id = self.create_test_spreadsheet()
         result = self.snippets.batch_update_values(spreadsheet_id,
-            'A1:B2', 'USER_ENTERED', [
-                ['A', 'B'],
-                ['C', 'D']
-            ])
+                                                   'A1:B2', 'USER_ENTERED', [
+                                                       ['A', 'B'],
+                                                       ['C', 'D']
+                                                   ])
         self.assertIsNotNone(result)
         self.assertEqual(1, len(result.get('responses')))
         self.assertEqual(2, result.get('totalUpdatedRows'))
@@ -91,10 +93,10 @@ class SpreadsheetSnippetsTest(BaseTest):
         spreadsheet_id = self.create_test_spreadsheet()
         self.populate_values(spreadsheet_id)
         result = self.snippets.append_values(spreadsheet_id,
-            'Sheet1', 'USER_ENTERED', [
-                ['A', 'B'],
-                ['C', 'D']
-            ])
+                                             'Sheet1', 'USER_ENTERED', [
+                                                 ['A', 'B'],
+                                                 ['C', 'D']
+                                             ])
         self.assertIsNotNone(result)
         self.assertEqual('Sheet1!A1:J10', result.get('tableRange'))
         updates = result.get('updates')
@@ -119,6 +121,7 @@ class SpreadsheetSnippetsTest(BaseTest):
         spreadsheet_id = self.create_test_spreadsheet()
         self.populate_values(spreadsheet_id)
         self.snippets.filter_views(spreadsheet_id)
+
 
 if __name__ == '__main__':
     unittest.main()

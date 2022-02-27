@@ -14,14 +14,18 @@
 
 # [START classroom_quickstart]
 from __future__ import print_function
+
 import os.path
-from googleapiclient.discovery import build
-from google_auth_oauthlib.flow import InstalledAppFlow
+
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ['https://www.googleapis.com/auth/classroom.courses.readonly']
+
 
 def main():
     """Shows basic usage of the Classroom API.
@@ -45,18 +49,24 @@ def main():
         with open('token.json', 'w') as token:
             token.write(creds.to_json())
 
-    service = build('classroom', 'v1', credentials=creds)
+    try:
+        service = build('classroom', 'v1', credentials=creds)
 
-    # Call the Classroom API
-    results = service.courses().list(pageSize=10).execute()
-    courses = results.get('courses', [])
+        # Call the Classroom API
+        results = service.courses().list(pageSize=10).execute()
+        courses = results.get('courses', [])
 
-    if not courses:
-        print('No courses found.')
-    else:
+        if not courses:
+            print('No courses found.')
+            return
+        # Prints the names of the first 10 courses.
         print('Courses:')
         for course in courses:
             print(course['name'])
+
+    except HttpError as error:
+        print('An error occurred: %s' % error)
+
 
 if __name__ == '__main__':
     main()

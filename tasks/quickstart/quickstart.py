@@ -14,14 +14,18 @@
 
 # [START tasks_quickstart]
 from __future__ import print_function
+
 import os.path
-from googleapiclient.discovery import build
-from google_auth_oauthlib.flow import InstalledAppFlow
+
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ['https://www.googleapis.com/auth/tasks.readonly']
+
 
 def main():
     """Shows basic usage of the Tasks API.
@@ -45,18 +49,23 @@ def main():
         with open('token.json', 'w') as token:
             token.write(creds.to_json())
 
-    service = build('tasks', 'v1', credentials=creds)
+    try:
+        service = build('tasks', 'v1', credentials=creds)
 
-    # Call the Tasks API
-    results = service.tasklists().list(maxResults=10).execute()
-    items = results.get('items', [])
+        # Call the Tasks API
+        results = service.tasklists().list(maxResults=10).execute()
+        items = results.get('items', [])
 
-    if not items:
-        print('No task lists found.')
-    else:
+        if not items:
+            print('No task lists found.')
+            return
+
         print('Task lists:')
         for item in items:
             print(u'{0} ({1})'.format(item['title'], item['id']))
+    except HttpError as err:
+        print(err)
+
 
 if __name__ == '__main__':
     main()

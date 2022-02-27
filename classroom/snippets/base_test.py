@@ -13,12 +13,14 @@
 # limitations under the License.
 
 from __future__ import print_function
+
 import sys
 import unittest
+
 import httplib2
 from googleapiclient import errors
 from googleapiclient.discovery import build
-from oauth2client import file, client, tools
+from oauth2client.client import GoogleCredentials
 
 SCOPES = 'https://www.googleapis.com/auth/classroom.courses'
 
@@ -40,12 +42,9 @@ class BaseTest(unittest.TestCase):
 
     @classmethod
     def create_credentials(cls):
-        store = file.Storage('token.json')
-        credentials = None
-        if not credentials or credentials.invalid:
-            flow = client.flow_from_clientsecrets('credentials.json', SCOPES)
-            credentials = tools.run_flow(flow, store)
-        return credentials
+        cls.credentials = GoogleCredentials.get_application_default()
+        scope = ['https://www.googleapis.com/auth/drive']
+        return cls.credentials.create_scoped(scope)
 
     def setUp(self):
         self.courses_to_delete = []

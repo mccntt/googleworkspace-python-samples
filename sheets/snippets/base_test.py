@@ -13,12 +13,15 @@
 # limitations under the License.
 
 from __future__ import print_function
-import unittest
+
 import sys
-from oauth2client.client import GoogleCredentials
+import unittest
+
+import httplib2
 from googleapiclient import errors
 from googleapiclient.discovery import build
-import httplib2
+from oauth2client.client import GoogleCredentials
+
 
 class BaseTest(unittest.TestCase):
     @classmethod
@@ -63,7 +66,7 @@ class BaseTest(unittest.TestCase):
             }
         }
         spreadsheet = self.service.spreadsheets().create(body=spreadsheet,
-                                            fields='spreadsheetId').execute()
+                                                         fields='spreadsheetId').execute()
         self.delete_file_on_cleanup(spreadsheet.get('spreadsheetId'))
         return spreadsheet.get('spreadsheetId')
 
@@ -89,6 +92,7 @@ class BaseTest(unittest.TestCase):
         }
         self.service.spreadsheets().batchUpdate(
             spreadsheetId=spreadsheet_id, body=body).execute()
+
 
 if __name__ == '__main__':
     unittest.main()

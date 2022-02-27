@@ -14,14 +14,17 @@
 
 # [START admin_sdk_reseller_quickstart]
 from __future__ import print_function
+
 import os.path
-from googleapiclient.discovery import build
-from google_auth_oauthlib.flow import InstalledAppFlow
+
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ['https://www.googleapis.com/auth/apps.order']
+
 
 def main():
     """Calls the Admin SDK Reseller API. Prints the customer ID, SKU ID,
@@ -57,7 +60,8 @@ def main():
         print('Subscriptions:')
         for subscription in subscriptions:
             print(u'{0} ({1}, {2})'.format(subscription['customerId'],
-                subscription['skuId'], subscription['plan']['planName']))
+                                           subscription['skuId'], subscription['plan']['planName']))
+
 
 if __name__ == '__main__':
     main()

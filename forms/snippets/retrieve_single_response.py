@@ -1,11 +1,11 @@
 # Copyright 2021 Google LLC
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     https://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,14 +14,14 @@
 
 # [START forms_retrieve_single_response]
 from __future__ import print_function
+
 from apiclient import discovery
 from httplib2 import Http
-from oauth2client import client
-from oauth2client import file
-from oauth2client import tools
+from oauth2client import client, file, tools
 
 SCOPES = "https://www.googleapis.com/auth/forms.responses.readonly"
-DISCOVERY_DOC = "https://forms.googleapis.com/$discovery/rest?version=v1beta&key=<YOUR_API_KEY>&labels=FORMS_BETA_TESTERS"
+API_KEY = "<YOUR_API_KEY>"
+DISCOVERY_DOC = f"https://forms.googleapis.com/$discovery/rest?version=v1beta&key={API_KEY}&labels=FORMS_BETA_TESTERS"
 
 store = file.Storage('credentials.json')
 creds = None
@@ -34,6 +34,7 @@ service = discovery.build('forms', 'v1beta', http=creds.authorize(
 # Prints the specified response from your form:
 form_id = '<YOUR_FORM_ID>'
 response_id = '<YOUR_RESPONSE_ID>'
-result = service.forms().responses().get(formId=form_id,responseId=response_id).execute()
+result = service.forms().responses().get(
+    formId=form_id, responseId=response_id).execute()
 print(result)
 # [END forms_retrieve_single_response]

@@ -14,14 +14,18 @@
 
 # [START gmail_quickstart]
 from __future__ import print_function
+
 import os.path
-from googleapiclient.discovery import build
-from google_auth_oauthlib.flow import InstalledAppFlow
+
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
+
 
 def main():
     """Shows basic usage of the Gmail API.
@@ -45,18 +49,23 @@ def main():
         with open('token.json', 'w') as token:
             token.write(creds.to_json())
 
-    service = build('gmail', 'v1', credentials=creds)
+    try:
+        # Call the Gmail API
+        service = build('gmail', 'v1', credentials=creds)
+        results = service.users().labels().list(userId='me').execute()
+        labels = results.get('labels', [])
 
-    # Call the Gmail API
-    results = service.users().labels().list(userId='me').execute()
-    labels = results.get('labels', [])
-
-    if not labels:
-        print('No labels found.')
-    else:
+        if not labels:
+            print('No labels found.')
+            return
         print('Labels:')
         for label in labels:
             print(label['name'])
+
+    except HttpError as error:
+        # TODO(developer) - Handle errors from gmail API.
+        print(f'An error occurred: {error}')
+
 
 if __name__ == '__main__':
     main()

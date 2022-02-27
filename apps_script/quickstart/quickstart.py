@@ -19,12 +19,14 @@ Call the Apps Script API to create a new script project, upload a file to the
 project, and log the script's URL to the user.
 """
 from __future__ import print_function
+
 import os.path
-from googleapiclient import errors
-from googleapiclient.discovery import build
-from google_auth_oauthlib.flow import InstalledAppFlow
+
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient import errors
+from googleapiclient.discovery import build
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ['https://www.googleapis.com/auth/script.projects']
@@ -41,6 +43,7 @@ SAMPLE_MANIFEST = '''
   "exceptionLogging": "CLOUD"
 }
 '''.strip()
+
 
 def main():
     """Calls the Apps Script API.
@@ -63,10 +66,10 @@ def main():
         with open('token.json', 'w') as token:
             token.write(creds.to_json())
 
-    service = build('script', 'v1', credentials=creds)
-
-    # Call the Apps Script API
     try:
+        service = build('script', 'v1', credentials=creds)
+
+        # Call the Apps Script API
         # Create a new project
         request = {'title': 'My Script'}
         response = service.projects().create(body=request).execute()
